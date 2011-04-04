@@ -18,6 +18,7 @@ class Main(wx.Frame):
         self.Bind(wx.EVT_TIMER, self.fill_info)
         self.timer = wx.Timer(self)
         self.timer.Start(3000)
+        self.fill_info(None)
         
     def get_info(self):
         f = open("/proc/acpi/battery/BAT0/state", "rb")
