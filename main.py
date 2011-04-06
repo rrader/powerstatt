@@ -15,7 +15,7 @@ class InfoGetter(object):
     
 class IGSys(InfoGetter):
     def __init__(self, bat="BAT0"):
-        s = lambda f:"/sys/class/power_supply/"+bat+"/"+f
+        s = lambda f:(lambda:self._read_file("/sys/class/power_supply/"+bat+"/"+f))
         self._params={"charging state" : s("status"),
                       "present rate": s("current_now"),
                       "present voltage": s("voltage_now"),
@@ -27,13 +27,12 @@ class IGSys(InfoGetter):
         
     def get_info(self, name):
         try:
-            fl = self._params[name]
-            return self._read_file(fl)
+            return self._params[name]()
         except KeyError:
             raise EUnsupported(name+" is unsupported here")
     
     def get_all_info(self):
-        return dict(zip(self._params.keys(),map(lambda x: self._read_file(x), self._params.values())))
+        return dict(zip(self._params.keys(),map(lambda x: x(), self._params.values())))
 
 class IGProc(InfoGetter):
     def __init__(self, bat="BAT0"):
@@ -58,11 +57,14 @@ class Main(wx.Frame):
     def __init__(self, parent):
         wx.Frame.__init__(self, parent, -1, "Battery state", style=wx.BORDER_DEFAULT, size=(240,120,))
         self.panel = wx.Panel(self, -1)
-        self._params=["charging state", "present rate", "present voltage", "remaining capacity"]
+        self._params = {"charging state" : "Charging state",
+                        "present rate" : "Present rate",
+                        "present voltage" : "Present voltage",
+                        "remaining capacity" : "Remaining capacity"}
         self._ys=[10,35,60,85]
         make_text_ctrl = lambda y: wx.TextCtrl(self.panel, -1, "", pos=(150, y), style=wx.TE_READONLY, size=(80,-1))
         make_static_text = lambda text, y: wx.StaticText(self.panel, -1, text, pos=(10, y))
-        self._st = map(make_static_text, self._params, self._ys)
+        self._st = map(make_static_text, self._params.values(), self._ys)
         self._ed = dict(zip( self._params, map(make_text_ctrl, self._ys) ))
         #updater
         self.info_getter = IGSys("BAT0")
