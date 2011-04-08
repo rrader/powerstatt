@@ -81,11 +81,21 @@ class Main(wx.Frame):
         m = self.get_info()
         r = map(lambda x:m[x], self._params)
         map(lambda x,val:self._ed[x].SetValue(val), self._params, r)
-        
+
+
+class MyApp(wx.App):
+    def OnInit(self):
+        frame = Main(None)
+        frame.Center(wx.BOTH)
+        frame.Show(False)
+        return True
     
-if __name__ == '__main__':
-    app = wx.App()
-    m=Main(None)
-    m.Show();
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv
+        
+    app = MyApp()
     app.MainLoop()
     
+if __name__ == '__main__':
+    main()
