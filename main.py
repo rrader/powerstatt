@@ -5,6 +5,23 @@ import wx
 import DataRetriever as dr
 import sys
 
+class TrayIcon(wx.TaskBarIcon):
+    def __init__(self,frame):
+        super(TrayIcon, self).__init__()
+        self.frame = frame
+        self.SetIcon(self.get_icon(), "Power Managment")
+        self.Bind(wx.EVT_TASKBAR_LEFT_UP, self.mouse_up)
+    
+    def mouse_up(self, m):
+        self.frame.Show(not self.frame.IsShown())
+    
+    def get_icon(self):
+        img = wx.EmptyBitmap(16,16)
+        img.LoadFile("/home/roma/projects/pybattery/ico.png", wx.BITMAP_TYPE_ANY)
+        icon = wx.EmptyIcon()
+        icon.CopyFromBitmap(img)
+        return icon
+
 class Main(wx.Frame):
     def __init__(self, parent):
         wx.Frame.__init__(self, parent, -1, "Battery state", style=wx.BORDER_DEFAULT, size=(240,120,))
@@ -25,6 +42,8 @@ class Main(wx.Frame):
         self.timer = wx.Timer(self)
         self.timer.Start(3000)
         self.fill_info(None)
+        self.tray = TrayIcon(self)
+        
         
     def get_info(self):
         return self.info_getter.get_all_info()
