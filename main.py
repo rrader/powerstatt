@@ -4,16 +4,20 @@
 import wx
 import DataRetriever as dr
 import sys
+import operator
 
 class TrayIcon(wx.TaskBarIcon):
     def __init__(self,frame):
         super(TrayIcon, self).__init__()
         self.frame = frame
         self.SetIcon(self.get_icon(), "Power Managment")
-        self.Bind(wx.EVT_TASKBAR_LEFT_UP, self.mouse_up)
+        self.Bind(wx.EVT_TASKBAR_LEFT_DOWN, self.toggle_frame)
     
-    def mouse_up(self, m):
-        self.frame.Show(not self.frame.IsShown())
+    def toggle_frame(self, m):
+        f = self.frame
+        csize = wx.ClientDisplayRect()[2:4]
+        f.SetPosition(map(operator.__sub__,csize,f.GetSizeTuple()))
+        f.Show(not f.IsShown())
     
     def get_icon(self):
         img = wx.EmptyBitmap(16,16)
@@ -52,12 +56,12 @@ class Main(wx.Frame):
         m = self.get_info()
         r = map(lambda x:m[x], self._params)
         map(lambda x,val:self._ed[x].SetValue(val), self._params, r)
+        
 
 
 class MyApp(wx.App):
     def OnInit(self):
         frame = Main(None)
-        frame.Center(wx.BOTH)
         frame.Show(False)
         return True
     
